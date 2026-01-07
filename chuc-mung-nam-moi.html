@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chúc Mừng Năm Mới</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    background: linear-gradient(135deg,#b5179e,#7209b7);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    margin: 20px 10px 5px;
+    font-size: 26px;
+    text-align: center;
+}
+
+h2 {
+    margin: 0 10px 10px;
+    font-size: 18px;
+    font-weight: normal;
+    text-align: center;
+}
+
+#wrapper {
+    width: 100%;
+    max-width: 420px;
+    padding: 10px;
+}
+
+canvas {
+    width: 100%;
+    height: auto;
+}
+
+button {
+    width: 100%;
+    padding: 16px;
+    margin-top: 15px;
+    font-size: 22px;
+    font-weight: bold;
+    background: #ffd166;
+    color: #000;
+    border: none;
+    border-radius: 14px;
+}
+
+button:disabled {
+    background: #aaa;
+}
+
+#result {
+    margin-top: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎊 CHÚC MỪNG NĂM MỚI 🎊</h1>
+<h2>Chúc anh em sức khỏe – tài lộc – may mắn</h2>
+
+<div id="wrapper">
+    <canvas id="wheel" width="500" height="500"></canvas>
+    <button id="spinBtn">🧧 QUAY LÌ XÌ</button>
+    <div id="result"></div>
+</div>
+
+<script>
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const spinBtn = document.getElementById("spinBtn");
+const result = document.getElementById("result");
+
+let prizes = [
+    ...Array(5).fill("100K"),
+    ...Array(5).fill("200K"),
+    ...Array(2).fill("500K")
+];
+
+let angle = 0;
+let spinning = false;
+
+function drawWheel() {
+    const arc = Math.PI * 2 / prizes.length;
+    ctx.clearRect(0,0,500,500);
+
+    prizes.forEach((p,i)=>{
+        const start = angle + i * arc;
+        ctx.beginPath();
+        ctx.fillStyle = ["#ffd166","#ef476f","#06d6a0","#118ab2","#f72585"][i % 5];
+        ctx.moveTo(250,250);
+        ctx.arc(250,250,230,start,start+arc);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(250,250);
+        ctx.rotate(start + arc/2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#000";
+        ctx.font = "bold 18px Arial";
+        ctx.fillText(p, 210, 8);
+        ctx.restore();
+    });
+
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.moveTo(250,10);
+    ctx.lineTo(238,45);
+    ctx.lineTo(262,45);
+    ctx.fill();
+}
+
+drawWheel();
+
+spinBtn.onclick = ()=>{
+    if(spinning || prizes.length === 0) return;
+    spinning = true;
+    spinBtn.disabled = true;
+    result.innerText = "";
+
+    let spinTime = 0;
+    let spinTotal = Math.random() * 2800 + 2200;
+
+    const spin = ()=>{
+        spinTime += 30;
+        angle += 0.35;
+        drawWheel();
+
+        if(spinTime >= spinTotal){
+            const arc = Math.PI * 2 / prizes.length;
+            const index = Math.floor((2*Math.PI - angle % (2*Math.PI)) / arc) % prizes.length;
+            const win = prizes[index];
+
+            prizes.splice(index,1);
+            result.innerText = `🎉 TRÚNG ${win} 🎉`;
+            spinning = false;
+            spinBtn.disabled = prizes.length === 0;
+            drawWheel();
+        } else {
+            requestAnimationFrame(spin);
+        }
+    };
+    spin();
+};
+</script>
+
+</body>
+</html>
